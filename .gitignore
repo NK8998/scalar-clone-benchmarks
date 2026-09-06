@@ -1,0 +1,7 @@
+# Local run artifacts — results belong in results/, deliberately committed.
+*.event.json
+*.perf.txt
+environment-*.txt
+runs/
+enl/
+cache/
