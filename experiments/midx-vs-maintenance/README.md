@@ -49,21 +49,23 @@ moved out of Scalar and into a caller without reimplementing anything.
 `--maintenance-now` exists because of a **race**: `scalar clone` arms the
 systemd maintenance timers *before* writing `maintenance.repo` to
 `~/.gitconfig`. The first timer tick therefore fires against an empty repo
-list, does nothing, and exits in ~19 ms. The next one is a full schedule period
-later.
+list, does nothing, and exits in ~19 ms. The next one is a full hour later.
 
-How long that is deserves care. The hourly unit is:
+The three units tile the clock between them, with a per-registration random
+minute (`git_rand(0) % 60`, so the offset differs per machine and is reshuffled
+every time maintenance is registered):
 
-```
-OnCalendar=*-*-* 1..23:52:00
-Persistent=true
-```
+| unit | `OnCalendar` | covers |
+|---|---|---|
+| hourly | `*-*-* 1..23:MM:00` | hours 1–23 |
+| daily | `Tue..Sun *-*-* 0:MM:00` | hour 0, Tue–Sun |
+| weekly | `Mon 0:MM:00` | hour 0, Mon |
 
-Hour **0 is excluded**, so the ticks are 01:52, 02:52 … 23:52 and then a
-two-hour gap. A clone finishing at 23:53 does not wait an hour — it waits until
-**01:52**, nearly **two hours**. Verified with
-`systemd-analyze calendar '*-*-* 1..23:52:00'`. So the idle cost is *up to
-3600 s for most of the day and up to ~7100 s across midnight*.
+Hour 0 is missing from the hourly unit, but the daily and weekly units fill it —
+and because the schedule enum is inverted (`WEEKLY=1, DAILY=2, HOURLY=3`, with
+the filter skipping when `task.schedule < opts->schedule`), a daily or weekly
+run also executes the *hourly* tasks, prefetch included. So every hour is
+covered and **worst-case idle is ~3600 s**.
 
 Reordering the two operations does not fix it: systemd's `Persistent=` catch-up
 is conditional on stamp state, and on a **fresh machine with no stamp it does
@@ -182,12 +184,12 @@ interrupted run can be restarted with the same command.
 | A | clone + ~6 min backfill |
 | B | clone + ~15 min backfill |
 | C | clone + ~15 min backfill |
-| D | clone + **up to ~2 h idle** + ~15 min |
+| D | clone + **up to ~60 min idle** + ~15 min |
 | E | clone + ~15–20 min |
 | F | clone + ~10–15 min |
 
 Clone itself has been measured anywhere from 243 s to 804 s depending on network
-conditions. Budget around **4 hours** for A/B/C/E/F, plus up to **2.5 hours**
+conditions. Budget around **4 hours** for A/B/C/E/F, plus up to **1.5 hours**
 for D on its own.
 
 ### Repeat the pair
@@ -253,11 +255,11 @@ toggleable in your binary before you spend four hours on the matrix.
   depends on this outright**: with a stale stamp it would report a few seconds
   of idle instead of the real wait — a fabricated number that looks entirely
   plausible.
-- **Cell D's idle depends on the time of day**, because of the hour-0 gap above.
-  A cell that finishes cloning at 10:05 waits ~47 min; one that finishes at
-  23:55 waits ~117 min. Record the clock time, and prefer not to start D late in
-  the evening unless the two-hour case is what you want to capture. `MAX_IDLE_S`
-  defaults to 8100 s so the worst case still fits.
+- **Cell D's idle depends on when the clone happens to finish**, since the timer
+  fires at a fixed random minute past each hour. A cell finishing at 10:05 with
+  the minute set to 55 waits ~50 min; one finishing at 10:54 waits ~1 min.
+  Record the clock time alongside the result — a single D run is a sample from
+  that range, not "the" idle. `MAX_IDLE_S` defaults to 5400 s.
 - **C and D are observed, not driven.** Their backfill runs detached, so the
   harness detects completion by watching for byte growth to stabilise while no
   relevant process is alive. That is inherently fuzzier than timing a command

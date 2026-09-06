@@ -73,10 +73,11 @@ case, which is both interference-free and the situation a real first-time clone
 is actually in.
 
 > **Exception — cell D.** That cell exists specifically to measure how long the
-> timer makes you wait, so it deliberately leaves the timers armed. Note that
-> the hourly unit is `OnCalendar=*-*-* 1..23:52:00` — **hour 0 is excluded**, so
-> a clone finishing after 23:52 waits until 01:52, nearly two hours rather than
-> one. Every other cell requires the timers off.
+> timer makes you wait, so it deliberately leaves the timers armed. The three
+> units tile the clock — hourly covers hours 1–23, daily and weekly cover hour 0
+> — at a random minute chosen per registration, so D's wait is up to about an
+> hour depending on when the clone happens to finish. Every other cell requires
+> the timers off.
 
 ### Kill leftover helpers
 

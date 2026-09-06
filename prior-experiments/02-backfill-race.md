@@ -41,25 +41,30 @@ Confirmation that nothing was fetched:
 git for-each-ref 'refs/prefetch/**'     # → 0 refs
 ```
 
-**Cost: a full schedule period of idle before backfill begins — and that is
-longer than it looks.** The hourly unit is:
+**Cost: up to ~3600 s of idle before backfill begins.**
 
-```
-OnCalendar=*-*-* 1..23:52:00
-Persistent=true
-```
+It is worth showing why that figure is an hour and not more, because the hourly
+unit on its own looks like it leaves a two-hour hole at midnight. The three
+units tile the clock between them, using a random minute chosen per
+registration (`get_random_minute()` → `git_rand(0) % 60`):
 
-Hour **0 is excluded**. Ticks land at 01:52, 02:52 … 23:52, then nothing until
-01:52 again. So a clone finishing at 23:53 waits until **01:52 — nearly two
-hours**, not one:
+| unit | `OnCalendar` | covers |
+|---|---|---|
+| hourly | `*-*-* 1..23:MM:00` | hours 1–23 |
+| daily | `Tue..Sun *-*-* 0:MM:00` | hour 0, Tue–Sun |
+| weekly | `Mon 0:MM:00` | hour 0, Mon |
+
+Hour 0 is absent from the hourly unit, but daily and weekly cover it — and
+because of the inverted schedule enum described below, those runs include the
+hourly tasks, prefetch among them. Verified:
 
 ```console
-$ systemd-analyze calendar '*-*-* 1..23:52:00' --base-time='2026-09-06 23:53:00'
-  Normalized form: *-*-* 01..23:52:00
-      Next elapse: Mon 2026-09-07 01:52:00 UTC
+$ systemd-analyze calendar 'Tue..Sun *-*-* 0:55:00' --base-time='2026-09-08 23:56:00'
+    Next elapse: Wed 2026-09-09 00:55:00 UTC     # 59 minutes, not 119
 ```
 
-Worst case is therefore **~7100 s**, not 3600 s.
+Since the minute is random per registration, the exact offset differs from
+machine to machine and changes whenever maintenance is re-registered.
 
 ---
 

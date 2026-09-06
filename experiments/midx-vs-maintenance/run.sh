@@ -45,10 +45,11 @@ CELL_GAP=${CELL_GAP:-60}          # cooldown between cells, seconds
 # Completion detection for the cells we observe rather than drive (C, D).
 POLL_S=${POLL_S:-5}               # how often to sample
 STABLE_S=${STABLE_S:-90}          # quiet period before declaring "done"
-# The hourly unit is OnCalendar=*-*-* 01..23:52 -- hour 0 is EXCLUDED, so a
-# clone finishing between 23:52 and 01:52 waits nearly two hours, not one.
-# Cell D must be able to sit through that without timing out.
-MAX_IDLE_S=${MAX_IDLE_S:-8100}    # give up waiting for backfill to START
+# Worst-case idle is one schedule period (~3600 s): the hourly unit covers hours
+# 1-23 and the daily/weekly units cover hour 0, and because the schedule enum is
+# inverted those runs include the hourly tasks too. 5400 s leaves headroom for a
+# slow tick without letting a genuinely stuck cell run all night.
+MAX_IDLE_S=${MAX_IDLE_S:-5400}    # give up waiting for backfill to START
 MAX_RUN_S=${MAX_RUN_S:-10800}     # give up waiting for it to FINISH
 
 STAMP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/systemd/timers"

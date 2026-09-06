@@ -28,7 +28,7 @@ moving bytes faster:
 | finding | effect | where |
 |---|---|---|
 | Writing a multi-pack-index over the shared cache before backfill | backfill **2.64x faster** (891.5 s → 337.7 s mean) | `prior-experiments/01-midx-ab.md` |
-| Backfill does not start until a systemd timer fires, and the first tick races registration and no-ops | up to **~7100 s** of pure idle | `prior-experiments/02-backfill-race.md` |
+| Backfill does not start until a systemd timer fires, and the first tick races registration and no-ops | up to **~3600 s** of pure idle | `prior-experiments/02-backfill-race.md` |
 
 The open question — and the reason for the current experiment — is whether the
 first of those needs a custom flag at all, or whether stock `git maintenance`
