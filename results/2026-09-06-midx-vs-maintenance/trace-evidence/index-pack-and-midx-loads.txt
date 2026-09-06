@@ -15,3 +15,10 @@ C      maint-now      0.0                  0            none        1424
 D      timer          0.0                  0            none        1368
 E      maint-daily    867.9                3            135         1415
 F      repack-first   257.2                35           102         336
+
+REPLICATION (run2, cell F re-run 2026-09-06 15:58 UTC, ~3.5 h later)
+-------------------------------------------------------------------
+F(run2) repack-first   258.7                38           102         344
+
+vs original F: index-pack 257.2 -> 258.7 s (0.6% apart), backfill 336 -> 344 s.
+Ordering identical: multi-pack-index @ trace line 19, fetch @ line 99.

@@ -1,8 +1,9 @@
 # midx-vs-maintenance — full six-cell matrix, 2026-09-06
 
 Complete run of `experiments/midx-vs-maintenance` (cells A–F), one run per cell,
-on a single box in one sitting. Every cell used the pinned fork build
-`2.55.0.vfs.0.8-midx.2` and cloned **1JS** with `--full-clone --no-prefetch`.
+plus **a second run of cell F** for replication. Single box, single day. Every
+cell used the pinned fork build `2.55.0.vfs.0.8-midx.2` and cloned **1JS** with
+`--full-clone --no-prefetch`.
 
 **Headline: stock `git maintenance` reproduces the entire `--midx` speed-up, but
 only if `incremental-repack` is ordered *before* `prefetch`.** The fork-local
@@ -36,9 +37,29 @@ holds, so the times are comparable.
 | D | timer        | 338 | 217 | 1368 | 1923 | no |
 | E | maint-daily  | 606 |   0 | 1415 | 2021 | written *after* the fetch |
 | F | repack-first | 330 |   0 | **336**  |  666 | yes (stock maintenance) |
+| F | repack-first *(run2)* | 337 | 0 | **344** | 681 | yes (stock maintenance) |
 
 `clone_s` varies a lot cell-to-cell (330–708 s). That is network variance on a
 shared, throttled link and is **not** the treatment — see "What not to conclude".
+
+### Replication of cell F
+
+F was re-run ~3.5 h later, after the network had recovered from the outage that
+voided an earlier attempt. It reproduces closely:
+
+| | original F | run2 F | delta |
+|---|---:|---:|---:|
+| `backfill_s` | 336 | 344 | +2.4% |
+| `index-pack` total | 257.2 s | 258.7 s | +0.6% |
+| `midx` loads / packs | 35 / 102 | 38 / 102 | — |
+| `largest_pack_bytes` | 6827039770 | 6827039770 | identical |
+
+The `index-pack` agreement to 0.6% is the meaningful one: it is the CPU-bound
+part the midx actually accelerates, measured over a byte-identical payload under
+different network conditions. Task ordering was identical in both
+(`multi-pack-index` at trace line 19, `fetch` at line 99).
+
+H5 therefore holds on both runs: 336 s and 344 s against A's 329 s.
 
 ### Hypothesis verdicts
 
@@ -103,9 +124,10 @@ capability and merely schedules it in an unhelpful order.
 
 ## Caveats — read before citing these numbers
 
-- **One run per cell.** The experiment README recommends replicating the A/B
-  pair (`RUNTAG=run2 ./run.sh A B`) before publishing. Not yet done. A/B is
-  consistent with the historical 2.64x, which is reassuring but not replication.
+- **One run per cell, except F.** F has been replicated (see above). The A/B
+  reference pair has **not** — it is a single run, though its 2.83x is
+  consistent with the historical 2.64x. Replicating A/B
+  (`RUNTAG=run2 ./run.sh A B`) is the remaining gap before publishing upstream.
 - **Cell D's 217 s is not reproducible.** `Persistent=yes` and
   `LastTriggerUSec=2026-09-06 12:42:58` — a stamp from earlier in *this* session,
   so systemd fired almost immediately to catch up. A genuinely fresh machine

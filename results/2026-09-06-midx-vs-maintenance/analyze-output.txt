@@ -7,6 +7,7 @@ C     0906-maint-now     449      0       1424        1873     0     0          
 D     0906-timer         338      217     1368        1923     0     0           6827039770    12583994996    527414
 E     0906-maint-daily   606      0       1415        2021     0     0           6827039770    13359617801    527409
 F     0906-repack-first  330      0       336         666      0     0           6827039770    12678979270    527412
+F     run2-repack-first  337      0       344         681      0     0           6827039770    12722114967    527424
 
 === payload control ===
 largest_pack_bytes must be IDENTICAL across every cell.
@@ -30,6 +31,7 @@ comparison below is valid.
   0906-timer         217
   0906-maint-daily   0
   0906-repack-first  0
+  run2-repack-first  0
 
   H2: cell C idle should be ~0.
   H3: cell D idle is the real-world wait nobody has measured before.
@@ -41,5 +43,6 @@ comparison below is valid.
   0906-timer         clone   338s + idle    217s + backfill  1368s =   1923s
   0906-maint-daily   clone   606s + idle      0s + backfill  1415s =   2021s
   0906-repack-first  clone   330s + idle      0s + backfill   336s =    666s
+  run2-repack-first  clone   337s + idle      0s + backfill   344s =    681s
 
 Raw records: /home/t-neilkainga/scalar-tests/runs/*/result.txt

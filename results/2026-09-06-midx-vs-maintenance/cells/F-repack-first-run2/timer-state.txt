@@ -1,0 +1,2 @@
+LastTriggerUSec=Sun 2026-09-06 12:58:30 UTC
+Persistent=yes
