@@ -1,0 +1,9 @@
+d2 | main                     | region_enter |     |  3.956317 |           | gvfs-helper  | label:POST/objects(cs)
+d2 | main                     | data         |     | 304.347859 | 300.391542 | gvfs-helper  | ..error/curl:(curl:28) Timeout was reached [transient]
+d2 | main                     | region_leave |     | 304.348168 | 300.391851 | gvfs-helper  | label:POST/objects(cs)
+d2 | main                     | region_enter |     | 304.348989 |           | gvfs-helper  | label:POST/objects(cs)
+d2 | main                     | data         |     | 604.787054 | 300.438065 | gvfs-helper  | ..error/curl:(curl:28) Timeout was reached [transient]
+d2 | main                     | region_leave |     | 604.787354 | 300.438365 | gvfs-helper  | label:POST/objects(cs)
+d2 | main                     | region_enter |     | 604.787966 |           | gvfs-helper  | label:throttle/transient(cs)
+d2 | main                     | region_leave |     | 612.807596 |  8.019630 | gvfs-helper  | label:throttle/transient(cs)
+d2 | main                     | region_enter |     | 612.807952 |           | gvfs-helper  | label:POST/objects(cs)

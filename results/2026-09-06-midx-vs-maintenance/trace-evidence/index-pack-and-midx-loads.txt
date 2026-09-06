@@ -1,0 +1,17 @@
+index-pack cost and multi-pack-index usage during backfill
+extracted from backfill.perf.txt (trace2 GIT_TRACE2_PERF), which is too
+large to commit (1.4 GB across all cells) and is .gitignore'd by design.
+
+index_pack_total_s = sum of every index-pack atexit in the backfill phase.
+midx_loads         = count of 'midx | load/num_packs' emitted by index-pack.
+Cells C and D ran DETACHED, so their work is not in the harness's trace
+file at all -- 0.0 here means 'not observable', not 'no work done'.
+
+cell   name           index_pack_total_s   midx_loads   num_packs   backfill_s
+---------------------------------------------------------------------------------
+A      midx-on        243.8                31           102         329
+B      midx-off       866.6                0            none        931
+C      maint-now      0.0                  0            none        1424
+D      timer          0.0                  0            none        1368
+E      maint-daily    867.9                3            135         1415
+F      repack-first   257.2                35           102         336

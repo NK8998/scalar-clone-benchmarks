@@ -1,0 +1,34 @@
+TASK ORDERING: why E gets no benefit from the midx it writes
+==============================================================
+
+Line numbers are into each cell's backfill.perf.txt.
+
+--- E (maint-daily): 'maintenance run --schedule=daily' ---
+fetch runs FIRST, multi-pack-index LAST. The midx is written after the
+prefetch it was supposed to accelerate, so it helps only a LATER run.
+19:d1 | main                     | cmd_name     |     |           |           |              | fetch (maintenance/fetch)
+445:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+460:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+474:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+
+--- F (repack-first): 'maintenance run --task=incremental-repack' THEN '--task=prefetch' ---
+multi-pack-index runs FIRST, in a separate invocation, before any fetch.
+19:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+34:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+48:d1 | main                     | cmd_name     |     |           |           |              | multi-pack-index (maintenance/multi-pack-index)
+99:d1 | main                     | cmd_name     |     |           |           |              | fetch (maintenance/fetch)
+
+
+COST OF F's incremental-repack PHASE
+====================================
+The entire repack that unlocks the speed-up, from F's trace:
+d0 | main                     | child_start  |     |  0.001231 |           |              | ..[ch0] class:? argv:[git multi-pack-index write --no-progress]
+d0 | main                     | child_start  |     |  0.266224 |           |              | ..[ch1] class:? argv:[git multi-pack-index expire --no-progress]
+d0 | main                     | child_start  |     |  0.274703 |           |              | ..[ch2] class:? argv:[git multi-pack-index repack --no-progress --batch-size=118986461]
+d2 | main                     | cmd_name     |     |           |           |              | pack-objects (maintenance/multi-pack-index/pack-objects)
+
+  multi-pack-index write   0.263 s
+  multi-pack-index expire  0.004 s
+  multi-pack-index repack  3.730 s  (pack-objects)
+  ---------------------------------
+  incremental-repack total 4.33 s   -> saves ~609 s of index-pack

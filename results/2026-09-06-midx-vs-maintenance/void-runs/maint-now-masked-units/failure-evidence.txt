@@ -1,0 +1,7 @@
+Job failed. See "journalctl -xe" for details.
+fatal: failed to set up maintenance schedule
+Job failed. See "journalctl -xe" for details.
+fatal: failed to set up maintenance schedule
+Job failed. See "journalctl -xe" for details.
+fatal: failed to set up maintenance schedule
+warning: could not toggle maintenance

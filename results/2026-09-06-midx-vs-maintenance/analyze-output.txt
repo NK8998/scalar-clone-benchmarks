@@ -1,0 +1,45 @@
+
+=== cells ===
+cell  run                clone_s  idle_s  backfill_s  total_s  midx  midx_bytes  largest_pack  payload_final  commits
+A     0906-midx-on       708      0       329         1037     1     15199728    6827039770    12544764334    527402
+B     0906-midx-off      595      0       931         1526     0     0           6827039770    12529565449    527406
+C     0906-maint-now     449      0       1424        1873     0     0           6827039770    12582833550    527409
+D     0906-timer         338      217     1368        1923     0     0           6827039770    12583994996    527414
+E     0906-maint-daily   606      0       1415        2021     0     0           6827039770    13359617801    527409
+F     0906-repack-first  330      0       336         666      0     0           6827039770    12678979270    527412
+
+=== payload control ===
+largest_pack_bytes must be IDENTICAL across every cell.
+If it is not, the cells did not download the same thing and no
+comparison below is valid.
+  6827039770
+  -> OK: one distinct value
+
+=== backfill comparisons ===
+  H1  midx vs no midx (the reference pair)             A=329s  B=931s   -602s  (2.83x)
+  H2  midx vs immediate-maintenance                    A=329s  C=1424s   -1095s  (4.33x)
+  H2  control vs immediate-maintenance (expect ~equal) B=931s  C=1424s   -493s  (1.53x)
+  H4  midx vs daily schedule                           A=329s  E=1415s   -1086s  (4.30x)
+  H5  midx vs repack-then-prefetch  <-- the decision   A=329s  F=336s   -7s  (1.02x)
+
+=== idle ===
+  cell               idle_s
+  0906-midx-on       0
+  0906-midx-off      0
+  0906-maint-now     0
+  0906-timer         217
+  0906-maint-daily   0
+  0906-repack-first  0
+
+  H2: cell C idle should be ~0.
+  H3: cell D idle is the real-world wait nobody has measured before.
+
+=== end-to-end ===
+  0906-midx-on       clone   708s + idle      0s + backfill   329s =   1037s
+  0906-midx-off      clone   595s + idle      0s + backfill   931s =   1526s
+  0906-maint-now     clone   449s + idle      0s + backfill  1424s =   1873s
+  0906-timer         clone   338s + idle    217s + backfill  1368s =   1923s
+  0906-maint-daily   clone   606s + idle      0s + backfill  1415s =   2021s
+  0906-repack-first  clone   330s + idle      0s + backfill   336s =    666s
+
+Raw records: /home/t-neilkainga/scalar-tests/runs/*/result.txt

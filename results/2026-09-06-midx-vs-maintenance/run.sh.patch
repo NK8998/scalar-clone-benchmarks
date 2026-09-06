@@ -1,0 +1,25 @@
+diff --git a/experiments/midx-vs-maintenance/run.sh b/experiments/midx-vs-maintenance/run.sh
+index e7a0d70..39234cf 100755
+--- a/experiments/midx-vs-maintenance/run.sh
++++ b/experiments/midx-vs-maintenance/run.sh
+@@ -117,7 +117,10 @@ disarm_timers() {
+ 
+ drop_caches() {
+     sync
+-    sudo -n sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null \
++    # Prefer a sanctioned NOPASSWD helper if the box provides one; the inline
++    # `sh -c` form below is not covered by a command-specific sudoers rule.
++    sudo -n /usr/local/sbin/drop-caches 2>/dev/null \
++        || sudo -n sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null \
+         || echo "  note: could not drop page cache (needs sudo); timings will be optimistic"
+ }
+ 
+@@ -131,7 +134,7 @@ for opt in '--\[no-\]prefetch' '--\[no-\]midx' '--\[no-\]maintenance-now'; do
+     grep -q -- "$opt" < <("$PREFIX/bin/scalar" clone -h 2>&1) \
+         || die "$PREFIX/bin/scalar lacks $opt -- wrong build? see GIT-BUILDS.md"
+ done
+-grep -q -- '--prefetch-cache-server-url' < <("$PREFIX/bin/scalar" clone -h 2>&1) \
++grep -q -- '--\[no-\]prefetch-cache-server-url' < <("$PREFIX/bin/scalar" clone -h 2>&1) \
+     || die "$PREFIX/bin/scalar lacks --prefetch-cache-server-url"
+ 
+ log "build: $("$PREFIX/bin/git" --version)   ($PREFIX)"

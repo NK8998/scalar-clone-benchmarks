@@ -1,0 +1,11 @@
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-midx-on/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+hint: GVFS Protocol network requests are failing. This is
+hint: likely caused by a service outage or unstable network
+hint: connection. Check your local network or contact your
+hint: engineering systems team for assistance.
+hint: Disable this message with "git config set advice.gvfs.transientRetry false"
