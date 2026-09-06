@@ -411,12 +411,30 @@ run_cell() {
             fi
             echo "maintenance_strategy=${strat:-<unset>}" | tee -a "$out/meta.txt"
 
+            t_prep=0
+            if [ "$c" = F ]; then
+                # Build the index FIRST, and time it SEPARATELY.
+                #
+                # This split is what makes F comparable to A at all. Cell A
+                # writes its midx during the clone, so A's index cost is buried
+                # inside clone_s while its backfill_s measures a prefetch that
+                # already has an index. If F's repack were folded into
+                # backfill_s, F would be carrying a cost A hides, and the two
+                # cells could not be compared either way round.
+                #
+                # Kept separate, the honest comparisons become available:
+                #   A.backfill_s vs F.backfill_s   prefetch, both indexed
+                #   A.prep_s     vs F.prep_s       cost of building the index
+                #   all-in totals                  what a developer actually waits
+                tp=$SECONDS
+                git -C "$wt" maintenance run --task=incremental-repack 2>&1 | tee "$out/prep.log"
+                t_prep=$((SECONDS - tp))
+            fi
+
             t2=$SECONDS
             case "$c" in
                 E) git -C "$wt" maintenance run --schedule=daily 2>&1 | tee "$out/backfill.log" ;;
-                F) git -C "$wt" maintenance run --task=incremental-repack 2>&1 | tee "$out/backfill.log"
-                   git -C "$wt" maintenance run --task=prefetch          2>&1 | tee -a "$out/backfill.log" ;;
-                *) git -C "$wt" maintenance run --task=prefetch          2>&1 | tee "$out/backfill.log" ;;
+                *) git -C "$wt" maintenance run --task=prefetch  2>&1 | tee "$out/backfill.log" ;;
             esac
             t_backfill=$((SECONDS - t2))
             t_idle=0
@@ -429,10 +447,41 @@ run_cell() {
                 log "  cell $c: scalar kicked off maintenance; observing"
             fi
             read -r t_idle t_backfill < <(wait_for_backfill "$cache" "$out")
+            t_prep=0
             [ "$t_idle"     != "-1" ] || log "  WARNING: backfill never started within ${MAX_IDLE_S}s"
             [ "$t_backfill" != "-1" ] || log "  WARNING: backfill did not finish within ${MAX_RUN_S}s"
         fi
         unset GIT_TRACE2_EVENT GIT_TRACE2_PERF
+
+        # Cell A's midx is written DURING the clone, so its cost is already
+        # inside clone_s. Recover it from the trace so it can be set against
+        # F's repack cost like for like. Best-effort: needs python3, and a
+        # missing value simply reports 0 rather than failing the run.
+        midx_write_s=0
+        if [ "$c" = A ] && [ -s "$out/clone.event.json" ] && command -v python3 >/dev/null 2>&1; then
+            midx_write_s=$(python3 -c '
+import json,sys
+pend={}; total=0.0
+for l in open(sys.argv[1]):
+    try: e=json.loads(l)
+    except Exception: continue
+    k=(e.get("sid"), e.get("child_id"))
+    if e.get("event")=="child_start":
+        if "multi-pack-index" in " ".join(e.get("argv") or []): pend[k]=1
+    elif e.get("event")=="child_exit" and k in pend:
+        total+=float(e.get("t_rel") or 0); pend.pop(k)
+print(int(round(total)))
+' "$out/clone.event.json" 2>/dev/null || echo 0)
+            log "  cell A: midx write took ${midx_write_s}s of the ${t_clone}s clone"
+        fi
+        if [ "$c" = A ]; then t_prep=$midx_write_s; fi
+
+        # A's prep is already inside clone_s; F's happens after the clone and so
+        # adds to the wall clock. Track that distinction rather than
+        # double-counting or dropping it.
+        prep_extra=$t_prep
+        if [ "$c" = A ]; then prep_extra=0; fi
+        t_total=$(( t_clone + (t_idle > 0 ? t_idle : 0) + prep_extra + (t_backfill > 0 ? t_backfill : 0) ))
 
         # ---- record everything BEFORE teardown -------------------------------
         # NOTE: do NOT add a `rev-list --objects --all` census here. In a GVFS
@@ -454,9 +503,11 @@ run_cell() {
             echo "post_threads=$POST_THREADS"
             echo "clone_s=$t_clone"
             echo "idle_s=$t_idle"
+            echo "prep_s=$t_prep"
+            echo "prep_in_clone=$([ "$c" = A ] && echo 1 || echo 0)"
             echo "backfill_s=$t_backfill"
             echo "time_to_usable_s=$t_clone"
-            echo "total_s=$((t_clone + (t_idle > 0 ? t_idle : 0) + (t_backfill > 0 ? t_backfill : 0)))"
+            echo "total_s=$t_total"
             echo "packs_at_usable=$usable_packs"
             echo "packs_final=$packs"
             echo "largest_pack_bytes=${biggest:-0}"

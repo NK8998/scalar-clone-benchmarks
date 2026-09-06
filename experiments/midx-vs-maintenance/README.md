@@ -136,6 +136,32 @@ entirely from stock `git maintenance` tasks. **If F ≈ A, the custom `--midx`
 flag is unnecessary and can be replaced with stock maintenance calls.** If F is
 meaningfully slower than A, the flag is earning its keep.
 
+> **Why F's timing is split into `prep_s` and `backfill_s`.**
+> A and F do not pay for their index at the same moment. A writes its midx
+> *during* the clone, so that cost lands inside `clone_s`. F runs
+> `incremental-repack` *after* the clone. If F's repack were simply folded into
+> `backfill_s`, then `A.backfill_s` would be a prefetch-only number while
+> `F.backfill_s` was repack + prefetch — F would be carrying a cost A hides, and
+> any "A beats F" conclusion would be an artefact of the harness rather than a
+> property of the two approaches. It would also be the first thing a reviewer
+> attacked, and they would be right.
+>
+> So the harness times F's repack separately as `prep_s`, and recovers A's midx
+> write duration from the clone's trace2 stream into the same field. That gives
+> three comparisons instead of one misleading one:
+>
+> | comparison | question |
+> |---|---|
+> | `A.backfill_s` vs `F.backfill_s` | with an index already built, does prefetch cost the same? |
+> | `A.prep_s` vs `F.prep_s` | what does each approach charge to build that index? |
+> | all-in totals | what does a developer actually wait? |
+>
+> Note also that the two are **not identical work even when ordered
+> identically**: `incremental-repack` repacks objects as well as writing a midx,
+> whereas `--midx` only writes the index. Expect F's `prep_s` to exceed A's. The
+> interesting question is whether that extra cost buys anything back later, or
+> is simply spent.
+
 ---
 
 ## Hypotheses
@@ -148,9 +174,12 @@ State them before you run, so the result can disagree with you.
 | H2 | C's `idle_s` ≈ 0; C's `backfill_s` ≈ B's, **not** A's |
 | H3 | D is dominated by idle and is the slowest cell end to end |
 | H4 | E ≈ B on a first run, because prefetch precedes incremental-repack |
-| H5 | F ≈ A — stock maintenance can match the flag once ordering is fixed |
+| H5 | F's *prefetch* ≈ A's, but F's `prep_s` > A's, so A wins all-in |
 
-H5 is the decision-relevant one.
+H5 is the decision-relevant one, and it is deliberately stated in a way that can
+fail. A plausible outcome is that stock maintenance, correctly ordered, matches
+`--midx` closely enough that the flag is not worth maintaining. The experiment
+is built to be able to return that answer.
 
 ---
 
@@ -210,16 +239,25 @@ Each cell writes `$ROOT/runs/<tag>-<cell>/`:
 
 | file | contents |
 |---|---|
-| `result.txt` | the measurements — `clone_s`, `idle_s`, `backfill_s`, `total_s`, pack census |
+| `result.txt` | the measurements — `clone_s`, `idle_s`, `prep_s`, `backfill_s`, `total_s`, pack census |
 | `meta.txt` | exact build, flags, exec-path, config actually in force |
 | `kickoff.txt` | whether a maintenance kickoff was observed after the clone |
 | `timer-state.txt` | timer stamp / `LastTriggerUSec` state before the clone |
 | `clone.log`, `backfill.log` | command output |
+| `prep.log` | cell F only: the `incremental-repack` step, timed separately |
 | `*.event.json`, `*.perf.txt` | trace2, for per-phase attribution |
 | `pack-sizes.txt` | every pack and its size |
 | `midx.txt` | whether a midx existed, and how large |
 
 `analyze.sh` collates every `result.txt` into one table.
+
+`prep_s` is the cost of building the index, held apart from the backfill so that
+A and F can be compared (see the F note above). `prep_in_clone=1` marks A, where
+that cost is already inside `clone_s` and so is **not** added again to
+`total_s`; for F it is additional wall clock. A's figure is recovered from the
+clone's trace2 stream by pairing the `multi-pack-index` `child_start` with its
+`child_exit` on `(sid, child_id)`. It needs `python3`; without it the field
+reports `0` rather than failing the run.
 
 ### The control that makes it trustworthy
 
@@ -270,3 +308,10 @@ toggleable in your binary before you spend four hours on the matrix.
   present before relying on it.
 - **Do not compare across machines.** A second devbox indexed the same pack
   **3.18x slower**. Only on-box, same-session comparisons mean anything.
+- **A's and F's `prep_s` are measured differently.** F's is wall clock around a
+  command the harness invoked. A's is derived from trace2 and rounded to whole
+  seconds, and it captures only the `multi-pack-index` child process — any midx
+  setup scalar does outside that child is not counted, so A's figure is a slight
+  under-estimate. At the scale these numbers are expected to have (tens of
+  seconds against backfills of many minutes) that asymmetry should not change
+  any conclusion, but do not quote `prep_s` to the second.
