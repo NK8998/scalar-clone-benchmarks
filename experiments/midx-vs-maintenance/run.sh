@@ -45,9 +45,13 @@ CELL_GAP=${CELL_GAP:-60}          # cooldown between cells, seconds
 # Completion detection for the cells we observe rather than drive (C, D).
 POLL_S=${POLL_S:-5}               # how often to sample
 STABLE_S=${STABLE_S:-90}          # quiet period before declaring "done"
-MAX_IDLE_S=${MAX_IDLE_S:-4200}    # give up waiting for backfill to START
+# The hourly unit is OnCalendar=*-*-* 01..23:52 -- hour 0 is EXCLUDED, so a
+# clone finishing between 23:52 and 01:52 waits nearly two hours, not one.
+# Cell D must be able to sit through that without timing out.
+MAX_IDLE_S=${MAX_IDLE_S:-8100}    # give up waiting for backfill to START
 MAX_RUN_S=${MAX_RUN_S:-10800}     # give up waiting for it to FINISH
 
+STAMP_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/systemd/timers"
 SUMMARY="$ROOT/summary-$RUNTAG.csv"
 
 CELLS=("$@")
@@ -94,14 +98,45 @@ cell_wants_timers() {
 # ---- environment hygiene ----------------------------------------------------
 quiesce() {
     disarm_timers
+    clear_timer_stamps
     local p
     for p in $(pgrep -x git-gvfs-helper 2>/dev/null || true); do
         kill "$p" 2>/dev/null || true
     done
-    local t r
+    local t r s
     t=$(systemctl --user list-timers 'git-maintenance*' --no-legend 2>/dev/null | wc -l)
     r=$(git config --global --get-all maintenance.repo 2>/dev/null | wc -l || true)
-    echo "  quiesce: timers=$t maintenance.repo=$r" >&2
+    s=$(ls "$STAMP_DIR"/stamp-git-maintenance@* 2>/dev/null | wc -l)
+    echo "  quiesce: timers=$t maintenance.repo=$r stamps=$s" >&2
+}
+
+# ---------------------------------------------------------------------------
+# Delete the systemd timer stamps.
+#
+# This is NOT housekeeping -- it is a correctness requirement, and leaving it
+# out silently corrupts every cell after the first.
+#
+# The maintenance timers ship Persistent=true. `scalar clone` re-enables them
+# during registration in EVERY cell, including cells that passed
+# --no-maintenance-now, because registration and the kickoff are separate steps.
+# If a stamp from a previous cell is lying around, systemd treats the timer as
+# overdue and fires a catch-up tick THE MOMENT it is enabled -- launching a
+# background `git maintenance run --schedule=hourly` that competes with the
+# backfill we are trying to time.
+#
+# Measured directly with a probe unit on this box:
+#
+#     no stamp      -> catch-up does NOT fire
+#     stale stamp   -> catch-up FIRES immediately on enable
+#
+# Clearing the stamps forces the first case, which is also the honest one: a
+# developer's first-ever clone is on a machine that has never run maintenance
+# and therefore has no stamp. Cell D depends on this outright -- with a stale
+# stamp it would report a few seconds of idle instead of the real wait, which
+# is a fabricated number that looks entirely plausible.
+# ---------------------------------------------------------------------------
+clear_timer_stamps() {
+    rm -f "$STAMP_DIR"/stamp-git-maintenance@*.timer 2>/dev/null || true
 }
 
 # Stop the timers WITHOUT killing anything already running. `scalar clone`
@@ -307,10 +342,26 @@ run_cell() {
         wt="$enl/src"; [ -d "$wt" ] || wt="$enl"
         echo "$wt" > "$out/worktree.txt"
 
+        # ---- verify the maintenance-now knob did what was asked -------------
+        # Same reasoning as the midx assertion below: a silently ignored flag
+        # would not fail, it would just quietly run a SECOND backfill alongside
+        # the one being timed, contending for bandwidth and corrupting both the
+        # duration and the byte counts.
+        kick=0
+        pgrep -f 'maintenance run'   >/dev/null 2>&1 && kick=1
+        pgrep -x git-gvfs-helper     >/dev/null 2>&1 && kick=1
+        if [ "$c" = C ]; then
+            [ "$kick" = 1 ] || log "  note: --maintenance-now kickoff not yet visible; watcher will confirm"
+        else
+            [ "$kick" = 0 ] \
+                || die "cell $c passed --no-maintenance-now but a maintenance/gvfs-helper process is running -- a second backfill would corrupt this measurement"
+        fi
+        echo "kickoff_observed=$kick" | tee "$out/kickoff.txt"
+
         # scalar re-arms the systemd timers during registration regardless of
-        # --no-maintenance-now. Disarm them now so an hourly tick cannot compete
-        # with the backfill we are about to time. This does NOT kill anything
-        # already running, so cell C's detached kickoff survives untouched.
+        # --no-maintenance-now. Disarm them now so a scheduled tick cannot
+        # compete with the backfill we are about to time. This does NOT kill
+        # anything already running, so cell C's detached kickoff is untouched.
         if [ "$(cell_wants_timers "$c")" = 0 ]; then
             disarm_timers
         fi

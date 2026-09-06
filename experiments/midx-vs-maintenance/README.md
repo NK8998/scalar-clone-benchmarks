@@ -49,13 +49,33 @@ moved out of Scalar and into a caller without reimplementing anything.
 `--maintenance-now` exists because of a **race**: `scalar clone` arms the
 systemd maintenance timers *before* writing `maintenance.repo` to
 `~/.gitconfig`. The first timer tick therefore fires against an empty repo
-list, does nothing, and exits in ~19 ms. The next tick is an hour later — so
-backfill can idle for up to **3600 s** before it even begins.
+list, does nothing, and exits in ~19 ms. The next one is a full schedule period
+later.
+
+How long that is deserves care. The hourly unit is:
+
+```
+OnCalendar=*-*-* 1..23:52:00
+Persistent=true
+```
+
+Hour **0 is excluded**, so the ticks are 01:52, 02:52 … 23:52 and then a
+two-hour gap. A clone finishing at 23:53 does not wait an hour — it waits until
+**01:52**, nearly **two hours**. Verified with
+`systemd-analyze calendar '*-*-* 1..23:52:00'`. So the idle cost is *up to
+3600 s for most of the day and up to ~7100 s across midnight*.
 
 Reordering the two operations does not fix it: systemd's `Persistent=` catch-up
 is conditional on stamp state, and on a **fresh machine with no stamp it does
-not fire at all**. A first-ever clone — exactly the case we care about — gets no
-catch-up. Hence an explicit kickoff.
+not fire at all**. Measured with a probe unit:
+
+| stamp state | catch-up fires on enable? |
+|---|---|
+| no stamp (fresh machine) | **no** |
+| stale stamp | **yes, immediately** |
+
+A first-ever clone — exactly the case we care about — gets no catch-up. Hence an
+explicit kickoff.
 
 ---
 
@@ -162,12 +182,13 @@ interrupted run can be restarted with the same command.
 | A | clone + ~6 min backfill |
 | B | clone + ~15 min backfill |
 | C | clone + ~15 min backfill |
-| D | clone + **up to 60 min idle** + ~15 min |
+| D | clone + **up to ~2 h idle** + ~15 min |
 | E | clone + ~15–20 min |
 | F | clone + ~10–15 min |
 
 Clone itself has been measured anywhere from 243 s to 804 s depending on network
-conditions. Budget around **4 hours** for the full matrix.
+conditions. Budget around **4 hours** for A/B/C/E/F, plus up to **2.5 hours**
+for D on its own.
 
 ### Repeat the pair
 
@@ -189,6 +210,8 @@ Each cell writes `$ROOT/runs/<tag>-<cell>/`:
 |---|---|
 | `result.txt` | the measurements — `clone_s`, `idle_s`, `backfill_s`, `total_s`, pack census |
 | `meta.txt` | exact build, flags, exec-path, config actually in force |
+| `kickoff.txt` | whether a maintenance kickoff was observed after the clone |
+| `timer-state.txt` | timer stamp / `LastTriggerUSec` state before the clone |
 | `clone.log`, `backfill.log` | command output |
 | `*.event.json`, `*.perf.txt` | trace2, for per-phase attribution |
 | `pack-sizes.txt` | every pack and its size |
@@ -203,19 +226,38 @@ must be identical across every cell.** In the original A/B it was
 `6,827,039,770` bytes in all five runs. If it varies between your cells, the
 cells did not download the same thing and the comparison is invalid.
 
-The harness also *asserts* that the midx knob did what was asked: it dies if
-`--midx` produced no `multi-pack-index`, or if `--no-midx` produced one. A
-silently no-op'd flag would otherwise turn the whole experiment into noise.
+The harness also *asserts* that both knobs did what was asked. It dies if
+`--midx` produced no `multi-pack-index`, or if `--no-midx` produced one; and it
+dies if a cell that passed `--no-maintenance-now` has a maintenance or
+`gvfs-helper` process running when the clone returns. Both flags default to
+**on** in this build, so a silently ignored one would not fail — it would either
+turn the midx comparison into noise, or leave a second backfill running
+alongside the timed one, corrupting the duration *and* the byte counts while
+still producing a plausible number.
+
+`GIT-BUILDS.md` has a one-minute probe that confirms both flags are genuinely
+toggleable in your binary before you spend four hours on the matrix.
 
 ---
 
 ## Known caveats
 
-- **Cell D is stamp-dependent.** systemd `Persistent=` catch-up fires if a
-  *stale* stamp exists but not if there is *no* stamp. So D's idle depends on
-  whether this box has ever run `git maintenance`. The harness records
-  `LastTriggerUSec` before the clone — report it alongside the result. On a
-  genuinely fresh machine, expect the full hour.
+- **Timer stamps are cleared before every cell, and this is load-bearing.**
+  `scalar clone` re-enables the maintenance timers during registration in *every*
+  cell, including those that passed `--no-maintenance-now` — registration and
+  kickoff are separate steps. Because the units carry `Persistent=true`, a stamp
+  left behind by a previous cell makes systemd fire a catch-up tick the instant
+  the timer is enabled, launching a background backfill that competes with the
+  one being timed. Clearing the stamps forces the fresh-machine case, which is
+  both interference-free and the scenario we actually care about. **Cell D
+  depends on this outright**: with a stale stamp it would report a few seconds
+  of idle instead of the real wait — a fabricated number that looks entirely
+  plausible.
+- **Cell D's idle depends on the time of day**, because of the hour-0 gap above.
+  A cell that finishes cloning at 10:05 waits ~47 min; one that finishes at
+  23:55 waits ~117 min. Record the clock time, and prefer not to start D late in
+  the evening unless the two-hour case is what you want to capture. `MAX_IDLE_S`
+  defaults to 8100 s so the worst case still fits.
 - **C and D are observed, not driven.** Their backfill runs detached, so the
   harness detects completion by watching for byte growth to stabilise while no
   relevant process is alive. That is inherently fuzzier than timing a command

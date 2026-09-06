@@ -66,13 +66,19 @@ sha256sum -c --ignore-missing SHA256SUMS
 dpkg-deb -x "microsoft-git_${VER}_${ARCH}.deb" "$PREFIX"
 ```
 
-The `.deb` unpacks to a `usr/` tree, so the binaries land at
-`$PREFIX/usr/bin`. Normalise that so the harness's layout detection works:
+The `.deb` unpacks to a **`usr/local/`** tree, so the binaries land at
+`$PREFIX/usr/local/bin` — not `$PREFIX/usr/bin`. Normalise that so the harness's
+layout detection works:
 
 ```bash
-[ -d "$PREFIX/usr" ] && cp -a "$PREFIX/usr/." "$PREFIX/" && rm -rf "$PREFIX/usr"
+[ -d "$PREFIX/usr/local" ] && cp -a "$PREFIX/usr/local/." "$PREFIX/" && rm -rf "$PREFIX/usr"
 ls "$PREFIX/bin/git" "$PREFIX/bin/scalar" "$PREFIX/lib/git-core/git-gvfs-helper"
 ```
+
+If you skip the normalisation, point `PREFIX` at `.../usr/local` instead. The
+harness detects both `lib/git-core` (the `.deb` layout) and `libexec/git-core`
+(an autotools build), but it will not go hunting through a `usr/local`
+subdirectory for you.
 
 ### Expected checksums
 
@@ -112,6 +118,62 @@ scalar clone -h 2>&1 | grep -- '--prefetch-cache-server-url'
 > compiled-in exec-path, not `PATH`. A relocated build without this exported
 > silently runs the *system* helper. This has already cost one run — see
 > PREREQUISITES.md §5.
+
+---
+
+## Confirm the flags are real, not hardcoded
+
+The entire matrix rests on `--midx` and `--maintenance-now` being genuinely
+toggleable. Both default to **on** in this build, so if either were forced on
+regardless of the flag, several cells would silently collapse into duplicates of
+each other and still produce plausible-looking numbers.
+
+They are not hardcoded. In `scalar.c` at the release tag both are ordinary
+`OPT_BOOL` entries backing plain variables, and both call sites are gated:
+
+```c
+int ... midx = 1;
+int maintenance_now = 1;
+
+OPT_BOOL(0, "midx", &midx, ...),
+OPT_BOOL(0, "maintenance-now", &maintenance_now, ...),
+
+if (midx && write_shared_cache_midx())                  /* --no-midx skips */
+if (maintenance && maintenance_now && start_maintenance_now())
+```
+
+Note the second one is gated on `maintenance` as well, so `--no-maintenance`
+also suppresses the kickoff.
+
+You can verify the shipped binary end to end in about a minute, against any
+small public repo — `write_shared_cache_midx()` falls back to a plain
+`multi-pack-index write` when `gvfs.sharedCache` is unset, so a non-GVFS repo
+still exercises both paths:
+
+```bash
+W=$(mktemp -d)
+probe() {
+  local label=$1; shift
+  GIT_TRACE2_EVENT="$W/$label.json" scalar clone "$@" \
+      https://github.com/NK8998/scalar-clone-benchmarks.git "$W/$label" >/dev/null 2>&1
+  echo "$label: midx-write=$(grep -qc '"multi-pack-index".*"write"' "$W/$label.json" && echo YES || echo NO)" \
+       "kickoff=$(grep -q '"maintenance".*"run".*"--schedule=hourly"' "$W/$label.json" && echo YES || echo NO)"
+  scalar unregister "$W/$label" >/dev/null 2>&1
+}
+probe OFF --no-midx --no-maintenance-now
+probe ON  --midx    --maintenance-now
+rm -rf "$W"
+```
+
+Measured on `2.55.0.vfs.0.8-midx.2`:
+
+| flags | spawns `multi-pack-index write` | spawns `maintenance run --schedule=hourly` | midx on disk |
+|---|---|---|---|
+| `--no-midx --no-maintenance-now` | no | no | no |
+| `--midx --maintenance-now` | yes | yes | yes |
+
+If your build does not reproduce that table, **stop** — the matrix is not
+measuring what it claims to.
 
 ---
 

@@ -41,7 +41,25 @@ Confirmation that nothing was fetched:
 git for-each-ref 'refs/prefetch/**'     # → 0 refs
 ```
 
-**Cost: up to 3600 s of idle before backfill begins.**
+**Cost: a full schedule period of idle before backfill begins — and that is
+longer than it looks.** The hourly unit is:
+
+```
+OnCalendar=*-*-* 1..23:52:00
+Persistent=true
+```
+
+Hour **0 is excluded**. Ticks land at 01:52, 02:52 … 23:52, then nothing until
+01:52 again. So a clone finishing at 23:53 waits until **01:52 — nearly two
+hours**, not one:
+
+```console
+$ systemd-analyze calendar '*-*-* 1..23:52:00' --base-time='2026-09-06 23:53:00'
+  Normalized form: *-*-* 01..23:52:00
+      Next elapse: Mon 2026-09-07 01:52:00 UTC
+```
+
+Worst case is therefore **~7100 s**, not 3600 s.
 
 ---
 
@@ -61,6 +79,25 @@ is **conditional on stamp state**. Tested directly with a dummy unit:
 A first-ever clone on a fresh machine has no stamp. That is precisely the
 scenario the whole effort is about. Reordering fixes the case that was already
 survivable and does nothing for the case that hurts.
+
+### The same fact is a trap when benchmarking
+
+`scalar clone` re-enables the timers during registration in *every* run,
+including runs that passed `--no-maintenance-now` — registration and kickoff are
+separate steps. So if a stamp is left over from an earlier run, enabling the
+timer fires a catch-up tick **immediately**, launching a background backfill
+that competes with whatever you are trying to measure.
+
+Any harness must therefore clear the stamps between runs:
+
+```bash
+rm -f "${XDG_DATA_HOME:-$HOME/.local/share}"/systemd/timers/stamp-git-maintenance@*.timer
+```
+
+This also happens to be the honest configuration, since it reproduces the
+fresh-machine case. Without it, a cell intended to measure the *real* idle would
+report a few seconds instead of an hour or two — and the number would look
+entirely believable.
 
 Hence an **explicit kickoff** after the clone, rather than a reordering.
 

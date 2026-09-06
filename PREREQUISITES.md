@@ -47,9 +47,36 @@ git config --global --get-all maintenance.repo | wc -l
 The harness calls this before **and** after every cell. Do it manually once
 before you start, so you know the box was clean at the beginning.
 
+### Clear the timer stamps too
+
+Disabling the timers is not sufficient. The units carry `Persistent=true`, and
+**`scalar clone` re-enables them during registration in every cell** — including
+cells that passed `--no-maintenance-now`, because registration and kickoff are
+separate steps. If a stamp from an earlier cell is still on disk, systemd
+considers the timer overdue and fires a catch-up tick *the moment it is
+enabled*, starting a background backfill that competes with the one you are
+timing.
+
+Measured with a probe unit:
+
+| stamp state | catch-up fires on enable? |
+|---|---|
+| no stamp | **no** |
+| stale stamp | **yes, immediately** |
+
+```bash
+rm -f "${XDG_DATA_HOME:-$HOME/.local/share}"/systemd/timers/stamp-git-maintenance@*.timer
+```
+
+The harness does this as part of every quiesce. It forces the fresh-machine
+case, which is both interference-free and the situation a real first-time clone
+is actually in.
+
 > **Exception — cell D.** That cell exists specifically to measure how long the
-> timer makes you wait, so it deliberately leaves the timers armed. See the
-> experiment README. Every other cell requires them off.
+> timer makes you wait, so it deliberately leaves the timers armed. Note that
+> the hourly unit is `OnCalendar=*-*-* 1..23:52:00` — **hour 0 is excluded**, so
+> a clone finishing after 23:52 waits until 01:52, nearly two hours rather than
+> one. Every other cell requires the timers off.
 
 ### Kill leftover helpers
 
