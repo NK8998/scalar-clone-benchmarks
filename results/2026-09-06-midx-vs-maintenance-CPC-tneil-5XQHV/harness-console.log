@@ -1,0 +1,548 @@
+
+FATAL: /home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/bin/scalar lacks --prefetch-cache-server-url
+
+[12:25:39] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[12:25:39] matrix: cells=[A B]  root=/home/t-neilkainga/scalar-tests  tag=0906
+
+[12:25:57] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[12:25:57] matrix: cells=[A B]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[12:25:57] cell 0906-midx-on  (midx written before backfill; harness triggers prefetch)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-midx-on
+letter=A
+description=midx written before backfill; harness triggers prefetch
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-midx-on --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-midx-on
+started=2026-09-06T12:25:57+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-midx-on/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=0
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-midx-on/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=1 midx_bytes=15199756
+maintenance_strategy=incremental
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+
+[12:39:46]   cell A: midx write took 0s of the 452s clone
+cell=0906-midx-on
+letter=A
+midx_at_clone=1
+midx_bytes=15199756
+midx_after_backfill=1
+post_threads=8
+clone_s=452
+idle_s=0
+prep_s=0
+prep_in_clone=1
+backfill_s=375
+time_to_usable_s=452
+total_s=827
+packs_at_usable=102
+packs_final=135
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4972586509
+payload_final_bytes=12546113002
+cache_bytes=12502059029
+git_dir_bytes=44053973
+commits=527412
+finished=2026-09-06T12:39:57+00:00
+
+[12:39:57] tearing down 0906-midx-on
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[12:40:50] cooldown 60s
+
+[12:41:50] cell 0906-midx-off  (no midx; harness triggers prefetch (control))
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-midx-off
+letter=B
+description=no midx; harness triggers prefetch (control)
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-midx-off --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-midx-off
+started=2026-09-06T12:41:50+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-midx-off/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+
+[12:58:44] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[12:58:44] matrix: cells=[A B]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[12:58:44] cell 0906-midx-on already complete, skipping
+
+[12:58:44] cooldown 60s
+
+[12:59:44] cell 0906-midx-off  (no midx; harness triggers prefetch (control))
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-midx-off
+letter=B
+description=no midx; harness triggers prefetch (control)
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-midx-off --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-midx-off
+started=2026-09-06T12:59:48+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-midx-off/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=0
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-midx-off/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=0 midx_bytes=0
+maintenance_strategy=incremental
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+cell=0906-midx-off
+letter=B
+midx_at_clone=0
+midx_bytes=0
+midx_after_backfill=0
+post_threads=8
+clone_s=254
+idle_s=0
+prep_s=0
+prep_in_clone=0
+backfill_s=899
+time_to_usable_s=254
+total_s=1153
+packs_at_usable=102
+packs_final=135
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4957372430
+payload_final_bytes=12530899168
+cache_bytes=12486845429
+git_dir_bytes=44053739
+commits=527414
+finished=2026-09-06T13:19:12+00:00
+
+[13:19:12] tearing down 0906-midx-off
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[13:19:54] DONE -- traces retained under /home/t-neilkainga/scalar-tests/runs/ (enlistments and caches deleted)
+Collate with: ./analyze.sh
+
+[13:19:54] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[13:19:54] matrix: cells=[C E F]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[13:19:54] cell 0906-maint-now  (no midx; scalar kicks off maintenance immediately)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-maint-now
+letter=C
+description=no midx; scalar kicks off maintenance immediately
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-maint-now --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --maintenance-now
+driven=0
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-maint-now
+started=2026-09-06T13:19:54+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-maint-now/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=1
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-maint-now/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=0 midx_bytes=0
+
+[13:24:11]   cell C: scalar kicked off maintenance; observing
+
+[13:24:11]   backfill started after 0s idle
+cell=0906-maint-now
+letter=C
+midx_at_clone=0
+midx_bytes=0
+midx_after_backfill=0
+post_threads=8
+clone_s=257
+idle_s=0
+prep_s=0
+prep_in_clone=0
+backfill_s=1552
+time_to_usable_s=257
+total_s=1809
+packs_at_usable=102
+packs_final=135
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4957372433
+payload_final_bytes=12584921744
+cache_bytes=12540868002
+git_dir_bytes=44053742
+commits=527417
+finished=2026-09-06T13:51:35+00:00
+
+[13:51:35] tearing down 0906-maint-now
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[13:52:17] cooldown 60s
+
+[13:53:17] cell 0906-maint-daily  (no midx; harness runs the full daily schedule)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-maint-daily
+letter=E
+description=no midx; harness runs the full daily schedule
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-maint-daily --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-maint-daily
+started=2026-09-06T13:53:18+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-maint-daily/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+hint: GVFS Protocol network requests are failing. This is
+hint: likely caused by a service outage or unstable network
+hint: connection. Check your local network or contact your
+hint: engineering systems team for assistance.
+hint: Disable this message with "git config set advice.gvfs.transientRetry false"
+
+[14:35:40] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[14:35:40] matrix: cells=[A B]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[14:35:40] cell 0906-midx-on already complete, skipping
+
+[14:35:40] cooldown 60s
+
+[14:36:40] cell 0906-midx-off already complete, skipping
+
+[14:36:40] DONE -- traces retained under /home/t-neilkainga/scalar-tests/runs/ (enlistments and caches deleted)
+Collate with: ./analyze.sh
+
+[14:36:40] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[14:36:40] matrix: cells=[C E F]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[14:36:40] cell 0906-maint-now already complete, skipping
+
+[14:36:40] cooldown 60s
+
+[14:37:40] cell 0906-maint-daily  (no midx; harness runs the full daily schedule)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-maint-daily
+letter=E
+description=no midx; harness runs the full daily schedule
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-maint-daily --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-maint-daily
+started=2026-09-06T14:37:46+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-maint-daily/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=0
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-maint-daily/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=0 midx_bytes=0
+maintenance_strategy=incremental
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+cell=0906-maint-daily
+letter=E
+midx_at_clone=0
+midx_bytes=0
+midx_after_backfill=1
+post_threads=8
+clone_s=424
+idle_s=0
+prep_s=0
+prep_in_clone=0
+backfill_s=1415
+time_to_usable_s=424
+total_s=1839
+packs_at_usable=102
+packs_final=139
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4957433802
+payload_final_bytes=13453742726
+cache_bytes=13409688189
+git_dir_bytes=44054537
+commits=527419
+finished=2026-09-06T15:08:25+00:00
+
+[15:08:25] tearing down 0906-maint-daily
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[15:09:21] cooldown 60s
+
+[15:10:21] cell 0906-repack-first  (no midx; harness runs incremental-repack then prefetch)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-repack-first
+letter=F
+description=no midx; harness runs incremental-repack then prefetch
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-repack-first --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=1
+timers_armed=0
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-repack-first
+started=2026-09-06T15:10:21+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-repack-first/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=0
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-repack-first/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=0 midx_bytes=0
+maintenance_strategy=incremental
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+cell=0906-repack-first
+letter=F
+midx_at_clone=0
+midx_bytes=0
+midx_after_backfill=1
+post_threads=8
+clone_s=386
+idle_s=0
+prep_s=7
+prep_in_clone=0
+backfill_s=336
+time_to_usable_s=386
+total_s=729
+packs_at_usable=102
+packs_final=138
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4957432854
+payload_final_bytes=12721223811
+cache_bytes=12677169271
+git_dir_bytes=44054540
+commits=527421
+finished=2026-09-06T15:22:42+00:00
+
+[15:22:42] tearing down 0906-repack-first
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[15:23:38] DONE -- traces retained under /home/t-neilkainga/scalar-tests/runs/ (enlistments and caches deleted)
+Collate with: ./analyze.sh
+
+[15:23:38] build: git version 2.55.0.vfs.0.8-midx.2   (/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2)
+
+[15:23:38] matrix: cells=[D]  root=/home/t-neilkainga/scalar-tests  tag=0906
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[15:23:38] cell 0906-timer  (no midx, no kickoff; wait for the systemd timer)
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+  note: could not drop page cache (needs sudo); timings will be optimistic
+cell=0906-timer
+letter=D
+description=no midx, no kickoff; wait for the systemd timer
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-timer --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=0
+timers_armed=1
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-timer
+started=2026-09-06T15:23:38+00:00
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-timer/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.
+kickoff_observed=0
+cache_ok=/home/t-neilkainga/scalar-tests/cache/0906-timer/id_49b0c9f4-555f-4624-8157-a57e6df513b3
+midx_present=0 midx_bytes=0
+
+[15:29:49]   cell D: leaving timers ARMED and waiting (up to 90 min)
+
+[16:09:33]   backfill started after 2384s idle
+cell=0906-timer
+letter=D
+midx_at_clone=0
+midx_bytes=0
+midx_after_backfill=0
+post_threads=8
+clone_s=371
+idle_s=2384
+prep_s=0
+prep_in_clone=0
+backfill_s=1294
+time_to_usable_s=371
+total_s=4049
+packs_at_usable=102
+packs_final=138
+largest_pack_bytes=6827039770
+payload_at_usable_bytes=4957432948
+payload_final_bytes=12586121073
+cache_bytes=12542066554
+git_dir_bytes=44054519
+commits=527424
+finished=2026-09-06T16:32:38+00:00
+
+[16:32:38] tearing down 0906-timer
+  quiesce: timers=0 maintenance.repo=0 stamps=0
+
+[16:33:34] DONE -- traces retained under /home/t-neilkainga/scalar-tests/runs/ (enlistments and caches deleted)
+Collate with: ./analyze.sh
+
+=== cells ===
+cell  run                clone_s  idle_s  prep_s  backfill_s  total_s  midx  midx_bytes  largest_pack  payload_final  commits
+A     0906-midx-on       452      0       0       375         827      1     15199756    6827039770    12546113002    527412
+B     0906-midx-off      254      0       0       899         1153     0     0           6827039770    12530899168    527414
+C     0906-maint-now     257      0       0       1552        1809     0     0           6827039770    12584921744    527417
+D     0906-timer         371      2384    0       1294        4049     0     0           6827039770    12586121073    527424
+E     0906-maint-daily   424      0       0       1415        1839     0     0           6827039770    13453742726    527419
+F     0906-repack-first  386      0       7       336         729      0     0           6827039770    12721223811    527421
+
+  prep_s = time spent building the index before the backfill.
+     cell A: the midx write, which happens INSIDE the clone and so is already
+             counted in clone_s (recovered from the clone's trace2 stream).
+     cell F: incremental-repack, which happens AFTER the clone and therefore
+             adds to the wall clock.
+  Without this split, A would hide its index cost inside clone_s while F
+  carried its own inside backfill_s, and the two cells could not be compared
+  in either direction.
+
+=== payload control ===
+largest_pack_bytes must be IDENTICAL across every cell. If it is not, the
+cells did not download the same thing and nothing below is valid.
+  6827039770
+  -> OK: one distinct value
+
+=== backfill: prefetch phase only (col 6) ===
+  H1  midx vs no midx (the reference pair)           A=375s  B=899s   -524s  (2.40x)
+  H2  control vs immediate-maintenance (expect ~equal) B=899s  C=1552s   -653s  (1.73x)
+  H4  midx vs daily schedule                         A=375s  E=1415s   -1040s  (3.77x)
+  H5  midx vs repack-then-prefetch                   A=375s  F=336s   +39s  (0.90x)
+
+=== cost of building the index (col 5) ===
+  0906-repack-first    prep_s=7
+
+=== all-in: what a developer actually waits (col 7) ===
+  0906-midx-on         clone   452s + idle      0s + prep     0s + backfill   375s =    827s
+  0906-midx-off        clone   254s + idle      0s + prep     0s + backfill   899s =   1153s
+  0906-maint-now       clone   257s + idle      0s + prep     0s + backfill  1552s =   1809s
+  0906-timer           clone   371s + idle   2384s + prep     0s + backfill  1294s =   4049s
+  0906-maint-daily     clone   424s + idle      0s + prep     0s + backfill  1415s =   1839s
+  0906-repack-first    clone   386s + idle      0s + prep     7s + backfill   336s =    729s
+  H5  all-in: midx vs stock maintenance  <-- the decision A=827s  F=729s   +98s  (0.88x)
+  H1  all-in: midx vs no midx                        A=827s  B=1153s   -326s  (1.39x)
+
+=== idle ===
+  0906-midx-on         idle_s=0
+  0906-midx-off        idle_s=0
+  0906-maint-now       idle_s=0
+  0906-timer           idle_s=2384
+  0906-maint-daily     idle_s=0
+  0906-repack-first    idle_s=0
+  H2: cell C idle should be ~0.
+  H3: cell D idle is the real-world wait, and is the number nobody has measured.
+
+Raw records: /home/t-neilkainga/scalar-tests/runs/*/result.txt

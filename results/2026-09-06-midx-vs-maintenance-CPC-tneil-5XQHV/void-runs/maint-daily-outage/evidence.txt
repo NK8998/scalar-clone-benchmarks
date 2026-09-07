@@ -1,0 +1,24 @@
+The first Cell E attempt was discarded.
+
+It started at 2026-09-06T13:53:18Z and emitted:
+
+hint: GVFS Protocol network requests are failing. This is
+hint: likely caused by a service outage or unstable network
+hint: connection.
+
+The low-speed guard repeatedly terminated silent POST /objects requests after
+approximately 300 seconds:
+
+2026-09-06T13:58:43Z  curl:28 Timeout was reached [transient]
+2026-09-06T14:03:43Z  curl:28 Timeout was reached [transient]
+2026-09-06T14:08:51Z  curl:28 Timeout was reached [transient]
+2026-09-06T14:14:07Z  curl:28 Timeout was reached [transient]
+
+The helper backed off between attempts and later transferred some objects, but
+the matrix process ended before result.txt was written. The resumable harness
+then removed the partial enlistment and private cache and restarted E at
+2026-09-06T14:37:46Z.
+
+Only the clean restarted E result is present under cells/E-maint-daily.
+The original partial Trace2 file was intentionally removed with the void
+enlistment; the full console transcript retains the warning and restart.

@@ -1,0 +1,15 @@
+date: 2026-09-06T12:24:50+00:00
+host: CPC-tneil-5XQHV
+os: Ubuntu 26.04 LTS
+kernel: Linux 6.18.33.2-microsoft-standard-WSL2
+platform: WSL2
+cpu: AMD EPYC 7763 64-Core Processor
+cores: 16
+ram: 31Gi
+disk_free: 953G
+git: git version 2.55.0.vfs.0.8-midx.2
+exec_path: /home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+repository_commit: 88ab9d16c36d2968521dfd074712cded3d808a4a
+endpoint: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+gvfs.postThreads: 8
+http.sslBackend: gnutls

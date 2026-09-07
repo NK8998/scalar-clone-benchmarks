@@ -1,0 +1,55 @@
+
+=== cells ===
+cell  run                clone_s  idle_s  prep_s  backfill_s  total_s  midx  midx_bytes  largest_pack  payload_final  commits
+A     0906-midx-on       452      0       0       375         827      1     15199756    6827039770    12546113002    527412
+B     0906-midx-off      254      0       0       899         1153     0     0           6827039770    12530899168    527414
+C     0906-maint-now     257      0       0       1552        1809     0     0           6827039770    12584921744    527417
+D     0906-timer         371      2384    0       1294        4049     0     0           6827039770    12586121073    527424
+E     0906-maint-daily   424      0       0       1415        1839     0     0           6827039770    13453742726    527419
+F     0906-repack-first  386      0       7       336         729      0     0           6827039770    12721223811    527421
+
+  prep_s = time spent building the index before the backfill.
+     cell A: the midx write, which happens INSIDE the clone and so is already
+             counted in clone_s (recovered from the clone's trace2 stream).
+     cell F: incremental-repack, which happens AFTER the clone and therefore
+             adds to the wall clock.
+  Without this split, A would hide its index cost inside clone_s while F
+  carried its own inside backfill_s, and the two cells could not be compared
+  in either direction.
+
+=== payload control ===
+largest_pack_bytes must be IDENTICAL across every cell. If it is not, the
+cells did not download the same thing and nothing below is valid.
+  6827039770
+  -> OK: one distinct value
+
+=== backfill: prefetch phase only (col 6) ===
+  H1  midx vs no midx (the reference pair)           A=375s  B=899s   -524s  (2.40x)
+  H2  control vs immediate-maintenance (expect ~equal) B=899s  C=1552s   -653s  (1.73x)
+  H4  midx vs daily schedule                         A=375s  E=1415s   -1040s  (3.77x)
+  H5  midx vs repack-then-prefetch                   A=375s  F=336s   +39s  (0.90x)
+
+=== cost of building the index (col 5) ===
+  0906-repack-first    prep_s=7
+
+=== all-in: what a developer actually waits (col 7) ===
+  0906-midx-on         clone   452s + idle      0s + prep     0s + backfill   375s =    827s
+  0906-midx-off        clone   254s + idle      0s + prep     0s + backfill   899s =   1153s
+  0906-maint-now       clone   257s + idle      0s + prep     0s + backfill  1552s =   1809s
+  0906-timer           clone   371s + idle   2384s + prep     0s + backfill  1294s =   4049s
+  0906-maint-daily     clone   424s + idle      0s + prep     0s + backfill  1415s =   1839s
+  0906-repack-first    clone   386s + idle      0s + prep     7s + backfill   336s =    729s
+  H5  all-in: midx vs stock maintenance  <-- the decision A=827s  F=729s   +98s  (0.88x)
+  H1  all-in: midx vs no midx                        A=827s  B=1153s   -326s  (1.39x)
+
+=== idle ===
+  0906-midx-on         idle_s=0
+  0906-midx-off        idle_s=0
+  0906-maint-now       idle_s=0
+  0906-timer           idle_s=2384
+  0906-maint-daily     idle_s=0
+  0906-repack-first    idle_s=0
+  H2: cell C idle should be ~0.
+  H3: cell D idle is the real-world wait, and is the number nobody has measured.
+
+Raw records: /home/t-neilkainga/scalar-tests/runs/*/result.txt

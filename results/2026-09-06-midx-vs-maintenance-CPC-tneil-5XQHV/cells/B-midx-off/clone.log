@@ -1,0 +1,9 @@
+Initialized empty Git repository in /home/t-neilkainga/scalar-tests/enl/0906-midx-off/src/.git/
+Cache server URL: https://wbp-adoprx.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+Prefetch cache server URL: https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+warning: fetch normally indicates which branches had a forced update,
+but that check has been disabled; to re-enable, use '--show-forced-updates'
+flag or run 'git config fetch.showForcedUpdates true'
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+Your branch is up to date with 'origin/main'.

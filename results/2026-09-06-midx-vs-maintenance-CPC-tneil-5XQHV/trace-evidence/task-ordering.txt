@@ -1,0 +1,52 @@
+TASK ORDERING: why E gets no benefit and F does
+===============================================
+
+Line numbers below refer to each cell's backfill.perf.txt retained on the run
+box.
+
+--- E: maintenance run --schedule=daily ---
+
+Fetch runs first. The multi-pack-index tasks start only after the fetch and its
+index-pack children have finished.
+
+19:d1  cmd_name  fetch (maintenance/fetch)
+475:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+490:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+504:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+513:d2 cmd_name  pack-objects (maintenance/multi-pack-index/pack-objects)
+
+--- F: incremental-repack, then prefetch ---
+
+The multi-pack-index tasks run in the first maintenance invocation. Fetch does
+not start until the second invocation.
+
+19:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+34:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+48:d1 cmd_name  multi-pack-index (maintenance/multi-pack-index)
+57:d2 cmd_name  pack-objects (maintenance/multi-pack-index/pack-objects)
+99:d1 cmd_name  fetch (maintenance/fetch)
+
+F incremental-repack subtask durations:
+
+multi-pack-index write:
+  child_start 0.001051
+  child_exit  0.288016
+  duration    0.286965 s
+
+multi-pack-index expire:
+  child_start 0.288063
+  child_exit  0.295135
+  duration    0.007072 s
+
+multi-pack-index repack:
+  child_start 0.296588
+  child_exit  6.328832
+  duration    6.032244 s
+
+The harness's whole-command timer rounded the complete preparation phase to
+7 seconds.
+
+Cell A clone-time multi-pack-index write:
+  duration    0.208834 s
+
+The harness rounded that duration to zero seconds in result.txt.

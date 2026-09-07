@@ -1,0 +1,16 @@
+cell=0906-timer
+letter=D
+description=no midx, no kickoff; wait for the systemd timer
+version=git version 2.55.0.vfs.0.8-midx.2
+prefix=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2
+clone_args=--local-cache-path /home/t-neilkainga/scalar-tests/cache/0906-timer --prefetch-cache-server-url=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3 --full-clone --no-prefetch --no-midx --no-maintenance-now
+driven=0
+timers_armed=1
+gvfs.postThreads=8
+http.sslBackend=gnutls
+endpoint=https://gitcache.microsoft.engineering/49b0c9f4-555f-4624-8157-a57e6df513b3
+exec_path=/home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/lib/git-core
+gvfs_helper_mtime=2026-09-01 06:54:00.000000000 +0000
+http_low_speed=1000B/s over 300s
+private_cache=/home/t-neilkainga/scalar-tests/cache/0906-timer
+started=2026-09-06T15:23:38+00:00

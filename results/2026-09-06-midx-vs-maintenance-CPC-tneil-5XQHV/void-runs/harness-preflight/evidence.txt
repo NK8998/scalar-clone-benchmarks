@@ -1,0 +1,31 @@
+Two harness failures occurred before any benchmark measurement.
+
+1. Cache-server option help check
+
+Console:
+
+FATAL: /home/t-neilkainga/.1js/git/2.55.0.vfs.0.8-midx.2/bin/scalar lacks --prefetch-cache-server-url
+
+Cause:
+
+The help text renders the option as:
+
+--[no-]prefetch-cache-server-url
+
+The harness searched for the unrendered literal. The fix matches the rendered
+boolean form, consistent with the adjacent prefetch, midx, and maintenance-now
+checks.
+
+2. Empty timer-stamp glob under pipefail
+
+The next attempt printed the matrix header and exited before cell A. The
+quiesce function used:
+
+ls "$STAMP_DIR"/stamp-git-maintenance@* | wc -l
+
+With the required clean state (no stamps), ls returned status 2. Under
+set -o pipefail that command substitution terminated the script. The fix adds
+"|| true" to the count, matching the empty state the harness deliberately
+creates.
+
+Neither attempt reached scalar clone or produced a benchmark result.

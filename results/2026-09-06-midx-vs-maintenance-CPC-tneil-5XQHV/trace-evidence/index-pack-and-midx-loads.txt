@@ -1,0 +1,28 @@
+index-pack cost and multi-pack-index usage during backfill
+=========================================================
+
+Extracted from each cell's backfill.event.json. The raw traces remain on the
+run box because they are hundreds of megabytes per cell.
+
+index_pack_total_s = sum of t_abs for every process whose cmd_name is index-pack.
+midx_loads         = count of Trace2 data events with category=midx and
+                     key ending in load/num_packs.
+
+Cells C and D ran detached, so their backfill processes are outside the
+harness-owned trace. "not observable" does not mean no work was performed.
+
+cell  name           index_pack_total_s  processes  midx_loads  num_packs  backfill_s
+-------------------------------------------------------------------------------------
+A     midx-on        319.298             33         34          102        375
+B     midx-off       827.534             33          0          none       899
+C     maint-now      not observable      --         --          --         1552
+D     timer          not observable      --         --          --         1294
+E     maint-daily    849.066             35          5          138,139    1415
+F     repack-first   259.502             35         40          102,103     336
+
+Interpretation:
+
+- A versus B reproduces the multi-pack-index effect on this box.
+- E's index-pack total is close to B because E writes its midx after fetch.
+- F writes the midx first and its index-pack total is in the same fast group
+  as A.

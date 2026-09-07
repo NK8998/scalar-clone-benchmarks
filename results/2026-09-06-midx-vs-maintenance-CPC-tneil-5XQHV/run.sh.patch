@@ -1,0 +1,24 @@
+diff --git a/experiments/midx-vs-maintenance/run.sh b/experiments/midx-vs-maintenance/run.sh
+index 6e70a28..6aab4e2 100755
+--- a/experiments/midx-vs-maintenance/run.sh
++++ b/experiments/midx-vs-maintenance/run.sh
+@@ -107,7 +107,7 @@ quiesce() {
+     local t r s
+     t=$(systemctl --user list-timers 'git-maintenance*' --no-legend 2>/dev/null | wc -l)
+     r=$(git config --global --get-all maintenance.repo 2>/dev/null | wc -l || true)
+-    s=$(ls "$STAMP_DIR"/stamp-git-maintenance@* 2>/dev/null | wc -l)
++    s=$(ls "$STAMP_DIR"/stamp-git-maintenance@* 2>/dev/null | wc -l || true)
+     echo "  quiesce: timers=$t maintenance.repo=$r stamps=$s" >&2
+ }
+ 
+@@ -167,8 +167,8 @@ for opt in '--\[no-\]prefetch' '--\[no-\]midx' '--\[no-\]maintenance-now'; do
+     grep -q -- "$opt" < <("$PREFIX/bin/scalar" clone -h 2>&1) \
+         || die "$PREFIX/bin/scalar lacks $opt -- wrong build? see GIT-BUILDS.md"
+ done
+-grep -q -- '--prefetch-cache-server-url' < <("$PREFIX/bin/scalar" clone -h 2>&1) \
+-    || die "$PREFIX/bin/scalar lacks --prefetch-cache-server-url"
++grep -q -- '--\[no-\]prefetch-cache-server-url' < <("$PREFIX/bin/scalar" clone -h 2>&1) \
++    || die "$PREFIX/bin/scalar lacks --[no-]prefetch-cache-server-url"
+ 
+ log "build: $("$PREFIX/bin/git" --version)   ($PREFIX)"
+ 

@@ -1,0 +1,1 @@
+kickoff_observed=0
